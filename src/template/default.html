@@ -1,0 +1,11 @@
+<!-- cntnd_SKELETON/template/default.html -->
+{if $truncate}
+<div class="truncate" id="truncate-{$uuid}">
+{/if}
+{$text}
+{if $truncate}
+</div>
+<a target="{$uuid}" class="read-more">Mehr</a>
+<a target="{$uuid}" class="read-less" style="display: none;">Schliessen</a>
+{/if}
+<!-- cntnd_SKELETON/template/default.html -->
