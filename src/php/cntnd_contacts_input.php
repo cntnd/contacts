@@ -1,11 +1,11 @@
 ?><?php
-// cntnd_SKELETON_input
-$cntnd_module = "cntnd_SKELETON";
+// cntnd_contacts_input
+$cntnd_module = "cntnd_contacts";
 
 // includes
-cInclude('module', 'includes/class.cntnd_SKELETON.php');
-cInclude('module', 'includes/script.cntnd_SKELETON.php');
-cInclude('module', 'includes/style.cntnd_SKELETON.php');
+cInclude('module', 'includes/class.cntnd_contacts.php');
+cInclude('module', 'includes/script.cntnd_contacts.php');
+cInclude('module', 'includes/style.cntnd_contacts.php');
 
 // input/vars
 $truncate = (bool) "CMS_VALUE[1]";
@@ -15,7 +15,7 @@ $selectedDir = "CMS_VALUE[4]";
 
 // other vars
 $uuid = rand();
-$SKELETON = new Cntnd\Skeleton\CntndSkeleton($lang, $client);
+$contacts = new Cntnd\Contacts\CntndContacts($lang, $client);
 
 ?>
 <div class="form-vertical">
@@ -40,7 +40,7 @@ $SKELETON = new Cntnd\Skeleton\CntndSkeleton($lang, $client);
         <select name="CMS_VAR[4]" id="gallery_<?= $uuid ?>" size="1">
             <option value="false"><?= mi18n("SELECT_CHOOSE") ?></option>
             <?php
-            foreach ($SKELETON->folders() as $folder) {
+            foreach ($contacts->folders() as $folder) {
                 $selected = "";
                 if ($selectedDir == $folder) {
                     $selected = 'selected="selected"';

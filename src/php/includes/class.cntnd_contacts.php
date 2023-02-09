@@ -1,13 +1,13 @@
 <?php
 
-namespace Cntnd\Skeleton;
+namespace Cntnd\Contacts;
 
 require_once("class.cntnd_util.php");
 
 /**
- * cntnd_SKELETON Class
+ * cntnd_contacts Class
  */
-class CntndSkeleton extends CntndUtil
+class CntndContacts extends CntndUtil
 {
 
     private $lang;

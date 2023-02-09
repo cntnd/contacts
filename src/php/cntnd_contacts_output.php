@@ -1,6 +1,6 @@
 <?php
-// cntnd_SKELETON_output
-$cntnd_module = "cntnd_SKELETON";
+// cntnd_contacts_output
+$cntnd_module = "cntnd_contacts";
 
 // assert framework initialization
 defined('CON_FRAMEWORK') || die('Illegal call: Missing framework initialization - request aborted.');
@@ -9,10 +9,10 @@ defined('CON_FRAMEWORK') || die('Illegal call: Missing framework initialization 
 $editmode = cRegistry::isBackendEditMode();
 
 // includes
-cInclude('module', 'includes/class.cntnd_SKELETON.php');
+cInclude('module', 'includes/class.cntnd_contacts.php');
 if ($editmode) {
-    cInclude('module', 'includes/script.cntnd_SKELETON.php');
-    cInclude('module', 'includes/style.cntnd_SKELETON.php');
+    cInclude('module', 'includes/script.cntnd_contacts.php');
+    cInclude('module', 'includes/style.cntnd_contacts.php');
 }
 
 // input/vars
@@ -27,7 +27,7 @@ $selectedDir = "CMS_VALUE[4]";
 // other vars
 $uuid = rand();
 $text = "CMS_HTML[1]";
-$SKELETON = new Cntnd\Skeleton\CntndSkeleton($lang, $client);
+$contacts = new Cntnd\Contacts\CntndContacts($lang, $client);
 
 // module
 if ($editmode){
