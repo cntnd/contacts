@@ -7,7 +7,7 @@ cInclude('module', 'vendor/autoload.php');
 /**
  * cntnd_contacts Class
  */
-class CntndContacts
+class CntndContactsInput
 {
     private $client;
     private $db;

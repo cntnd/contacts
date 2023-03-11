@@ -1,0 +1,6 @@
+{
+    "require": {
+        "mailchimp/marketing": "*",
+        "apollo29/csvdb": "^0.0.8"
+    }
+}

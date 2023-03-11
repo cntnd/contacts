@@ -1,1 +1,17 @@
 MODULE=Contacts
+SOURCE=Quellen
+DB=Datenbank
+CSV=CSV
+CSV_FILE=CSV Datei
+CHOOSE=- bitte wählen -
+CSV_CONFIG=CSV Konfiguration
+ENCODING=Zeichensatz
+DELIMITER=Trennzeichen
+HEADERS=Headers
+HEADERS_INFO=Aktivieren wenn die CSV-Datei über eine Überschriften-Zeile verfügt
+CACHE=Cache
+CACHE_INFO=Aktivieren wenn der Zugriff auf die CSV-Datei gecached werden soll (performance)
+HISTORY=History
+HISTORY_INFO=Aktivieren wenn bei jeder Manipluation eine Sicherkungskopie erstellt werden soll (Achtung Speicherplatz!)
+INDEX=Index Feld
+DB_SOURCE=Datenbank Quelle

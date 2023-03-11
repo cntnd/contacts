@@ -6,7 +6,6 @@
   * .\cli.bat init [MODULE NAME in SNAKE CASE] --gulp
   * or if you run the .\cli.bat init without --gulp run gulp init
 
-
 * $cfg["tab"]:
     * "actionlog":"con_actionlog",
     * "actions":"con_actions",
