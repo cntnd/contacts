@@ -22,17 +22,13 @@ a:active {
   color: var(--btn-color-dark);
 }
 
-a.header__action {
+.header__action {
   font-size: smaller;
   font-weight: 500;
   margin-left: .5rem;
-}
-
-a.material-symbols-outlined {
-  text-decoration: none;
-}
-.material-symbols-outlined.danger {
-  color: var(--btn-color-danger);
+  color: var(--btn-color-base);
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .card {
@@ -43,10 +39,11 @@ a.material-symbols-outlined {
   margin: 0;
 }
 
-.popup .form-group.highlight input {
+.popup .highlight {
   background: rgba(255, 223, 0, 0.5);
 }
-.popup .form-check.highlight {
+
+.popup .form-check-input.highlight + label {
   border-radius: 2px;
   background: rgba(255, 223, 0, 0.5);
 }
@@ -74,4 +71,10 @@ a.material-symbols-outlined {
 
 .tabs__content--pane.spreadsheet {
   padding: 1px 0;
+}
+
+.popup .close,
+.add_contact,
+.remove_contact {
+  cursor: pointer;
 }

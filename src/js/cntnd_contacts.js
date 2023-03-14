@@ -1,5 +1,9 @@
 /* cntnd_contacts */
 $(document).ready(function () {
+  $(".new_contact").click(function (){
+    $("#editor").addClass('active');
+  });
+
   $(".add_contact").click(function () {
     let contact = $(this).data("contact");
     let action = $(this).data("action");
@@ -23,6 +27,8 @@ $(document).ready(function () {
       }
     });
 
+    console.log(json)
+
     if (json["_diff"] !== undefined) {
       $.each(json["_diff"], function (key) {
         $('form[name="editor_form"] input[name="' + key + '"]').addClass("highlight");
@@ -32,7 +38,7 @@ $(document).ready(function () {
     $('form[name="editor_form"] input[name="editor_form_action"]').val(action);
     $('form[name="editor_form"] input[name="editor_form_source"]').val(source);
     $('form[name="editor_form"] input[name="editor_form_index"]').val(index);
-    $("#editor").addClass('active')
+    $("#editor").addClass('active');
   });
 
   $(".editor_form_remove").click(function () {

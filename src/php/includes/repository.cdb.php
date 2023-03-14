@@ -6,8 +6,6 @@ use Contacts\Data\Mapping;
 use Contacts\Repository\Repository;
 use Selective\ArrayReader\ArrayReader;
 
-//cInclude('module', 'vendor/autoload.php');
-
 class cDBRepository implements Repository
 {
     private $db;
@@ -20,14 +18,14 @@ class cDBRepository implements Repository
 
     public function contacts(): array
     {
-        $sql = "SELECT * FROM :table ";
+        $sql = "SELECT * FROM :table ORDER BY id";
         $values = array(
             'table' => self::TABLE
         );
         $this->db->query($sql, $values);
         $data = [];
         while ($this->db->next_record()) {
-            $data[] = $this->to_data((array) $this->db->getResultObject());
+            $data[] = $this->to_data($this->db->toArray());
         }
         return $data;
     }
@@ -52,17 +50,15 @@ class cDBRepository implements Repository
     public function upsert(Contact $contact): void
     {
         $exist = $this->exists($contact->email);
-        $values = $contact->record();
-        $values['table'] = self::TABLE;
-        if (!$exist[0]) {
+        $values = $this->convert($contact);
+        if (count($exist) == 0) {
             // insert
-            $values['id'] = "";
-            $sql = "INSERT INTO :table (" . $this->columns() . ") VALUES (" . $this->values() . ")";
+            $values['id'] = "NULL";
+            $this->db->insert(self::TABLE, $values);
         } else {
             // update
-            $sql = "UPDATE :table SET " . $this->update_columns() . " WHERE " . $this->index() . "=:index ";
+            $this->db->update(self::TABLE, $values, [$this->index() => $contact->email]);
         }
-        $this->db->query($sql, $values);
     }
 
     public function delete($index): void
@@ -77,13 +73,13 @@ class cDBRepository implements Repository
 
     public function exists($index): array
     {
-        $sql = "SELECT * FROM :table WHERE " . $this->index() . "=:index ";
+        $sql = "SELECT * FROM :table WHERE email=':index' ";
         $values = array(
             'table' => self::TABLE,
             'index' => \cSecurity::toString($index)
         );
         $this->db->query($sql, $values);
-        return $this->db->getResultObject();
+        return (array)$this->db->getResultObject();
     }
 
     public function to_data(array $record): array
@@ -99,23 +95,23 @@ class cDBRepository implements Repository
         $data['telefon_geschaeftlich'] = $reader->findString('telefon_geschaeftlich', Mapping::$default_string);
         $data['telefon'] = $reader->findString('telefon', Mapping::$default_string);
         $data['mobile'] = $reader->findString('mobile', Mapping::$default_string);
-        $data['email'] = $reader->findString('email');
+        $data['email'] = $reader->findString('email', Mapping::$default_string);
         $data['email_2'] = $reader->findString('email_2', Mapping::$default_string);
 
-        $data['infomail_spontan'] = $reader->findBool('check:infomail_spontan', Mapping::$default_bool);
-        $data['newsletter'] = $reader->findBool('check:newsletter', Mapping::$default_bool);
+        $data['infomail_spontan'] = self::string_to_bool($reader->findString('check:infomail_spontan', "0"));
+        $data['newsletter'] = self::string_to_bool($reader->findString('check:newsletter', "0"));
 
-        $data['familie'] = $reader->findBool('tag:familie', Mapping::$default_bool);
-        $data['freunde'] = $reader->findBool('tag:freunde', Mapping::$default_bool);
-        $data['kollegen'] = $reader->findBool('tag:kollegen', Mapping::$default_bool);
-        $data['nachbarn'] = $reader->findBool('tag:nachbarn', Mapping::$default_bool);
-        $data['wanderleiter'] = $reader->findBool('tag:wanderleiter', Mapping::$default_bool);
-        $data['bergsportunternehmen'] = $reader->findBool('tag:bergsportunternehmen', Mapping::$default_bool);
-        $data['geschaeftskollegen'] = $reader->findBool('tag:geschaeftskollegen', Mapping::$default_bool);
-        $data['dienstleister'] = $reader->findBool('tag:dienstleister', Mapping::$default_bool);
-        $data['linkedin'] = $reader->findBool('tag:linkedin', Mapping::$default_bool);
-        $data['unternehmen'] = $reader->findBool('tag:unternehmen', Mapping::$default_bool);
-        $data['organisationen'] = $reader->findBool('tag:organisationen', Mapping::$default_bool);
+        $data['familie'] = self::string_to_bool($reader->findString('tag:familie', "0"));
+        $data['freunde'] = self::string_to_bool($reader->findString('tag:freunde', "0"));
+        $data['kollegen'] = self::string_to_bool($reader->findString('tag:kollegen', "0"));
+        $data['nachbarn'] = self::string_to_bool($reader->findString('tag:nachbarn', "0"));
+        $data['wanderleiter'] = self::string_to_bool($reader->findString('tag:wanderleiter', "0"));
+        $data['bergsportunternehmen'] = self::string_to_bool($reader->findString('tag:bergsportunternehmen', "0"));
+        $data['geschaeftskollegen'] = self::string_to_bool($reader->findString('tag:geschaeftskollegen', "0"));
+        $data['dienstleister'] = self::string_to_bool($reader->findString('tag:dienstleister', "0"));
+        $data['linkedin'] = self::string_to_bool($reader->findString('tag:linkedin', "0"));
+        $data['unternehmen'] = self::string_to_bool($reader->findString('tag:unternehmen', "0"));
+        $data['organisationen'] = self::string_to_bool($reader->findString('tag:organisationen', "0"));
         return $data;
     }
 
@@ -124,147 +120,38 @@ class cDBRepository implements Repository
         $data = array();
         $reader = new ArrayReader($record->record());
 
-        $data['id'] = $reader->findInt('id');
         $data['vorname'] = $reader->findString('vorname', Mapping::$default_string);
         $data['name'] = $reader->findString('name', Mapping::$default_string);
         $data['strasse'] = $reader->findString('strasse', Mapping::$default_string);
         $data['plz'] = $reader->findString('plz', Mapping::$default_string);
         $data['ort'] = $reader->findString('ort', Mapping::$default_string);
         $data['land'] = $reader->findString('land', Mapping::$default_string);
-        $data['telefon_geschaeftlich'] = $reader->findString('telefon_geschaeftlich', Mapping::$default_string);
         $data['telefon'] = $reader->findString('telefon', Mapping::$default_string);
+        $data['telefon_geschaeftlich'] = $reader->findString('telefon_geschaeftlich', Mapping::$default_string);
         $data['mobile'] = $reader->findString('mobile', Mapping::$default_string);
         $data['email'] = $reader->findString('email');
         $data['email_2'] = $reader->findString('email_2', Mapping::$default_string);
 
-        $data['check:infomail_spontan'] = $reader->findBool('infomail_spontan', Mapping::$default_bool);
-        $data['check:newsletter'] = $reader->findBool('newsletter', Mapping::$default_bool);
+        $data['check:infomail_spontan'] = Mapping::x_to_bool($reader->findString('infomail_spontan', Mapping::$default_string));
+        $data['check:newsletter'] = Mapping::x_to_bool($reader->findString('newsletter', Mapping::$default_string));
 
-        $data['tag:familie'] = $reader->findBool('familie', Mapping::$default_bool);
-        $data['tag:freunde'] = $reader->findBool('freunde', Mapping::$default_bool);
-        $data['tag:kollegen'] = $reader->findBool('kollegen', Mapping::$default_bool);
-        $data['tag:nachbarn'] = $reader->findBool('nachbarn', Mapping::$default_bool);
-        $data['tag:wanderleiter'] = $reader->findBool('wanderleiter', Mapping::$default_bool);
-        $data['tag:bergsportunternehmen'] = $reader->findBool('bergsportunternehmen', Mapping::$default_bool);
-        $data['tag:geschaeftskollegen'] = $reader->findBool('geschaeftskollegen', Mapping::$default_bool);
-        $data['tag:dienstleister'] = $reader->findBool('dienstleister', Mapping::$default_bool);
-        $data['tag:linkedin'] = $reader->findBool('linkedin', Mapping::$default_bool);
-        $data['tag:unternehmen'] = $reader->findBool('unternehmen', Mapping::$default_bool);
-        $data['tag:organisationen'] = $reader->findBool('organisationen', Mapping::$default_bool);
+        $data['tag:familie'] = Mapping::x_to_bool($reader->findString('familie', Mapping::$default_string));
+        $data['tag:freunde'] = Mapping::x_to_bool($reader->findString('freunde', Mapping::$default_string));
+        $data['tag:kollegen'] = Mapping::x_to_bool($reader->findString('kollegen', Mapping::$default_string));
+        $data['tag:nachbarn'] = Mapping::x_to_bool($reader->findString('nachbarn', Mapping::$default_string));
+        $data['tag:wanderleiter'] = Mapping::x_to_bool($reader->findString('wanderleiter', Mapping::$default_string));
+        $data['tag:bergsportunternehmen'] = Mapping::x_to_bool($reader->findString('bergsportunternehmen', Mapping::$default_string));
+        $data['tag:geschaeftskollegen'] = Mapping::x_to_bool($reader->findString('geschaeftskollegen', Mapping::$default_string));
+        $data['tag:dienstleister'] = Mapping::x_to_bool($reader->findString('dienstleister', Mapping::$default_string));
+        $data['tag:linkedin'] = Mapping::x_to_bool($reader->findString('linkedin', Mapping::$default_string));
+        $data['tag:unternehmen'] = Mapping::x_to_bool($reader->findString('unternehmen', Mapping::$default_string));
+        $data['tag:organisationen'] = Mapping::x_to_bool($reader->findString('organisationen', Mapping::$default_string));
         return $data;
     }
 
-    private function columns(): string
-    {
-        return "'id',
-            'vorname',
-            'name',
-            'strasse',
-            'plz',
-            'ort',
-            'land',
-            'telefon_geschaeftlich',
-            'telefon',
-            'mobile',
-            'email',
-            'email_2',
-            'check:infomail_spontan',
-            'check:newsletter',
-            'tag:familie',
-            'tag:freunde',
-            'tag:kollegen',
-            'tag:nachbarn',
-            'tag:wanderleiter',
-            'tag:bergsportunternehmen',
-            'tag:geschaeftskollegen',
-            'tag:dienstleister',
-            'tag:linkedin',
-            'tag:unternehmen',
-            'tag:organisationen'";
-    }
 
-    private function select_columns(): string
+    public static function string_to_bool(string $val): bool
     {
-        return "'vorname',
-            'name',
-            'strasse',
-            'plz',
-            'ort',
-            'land',
-            'telefon_geschaeftlich',
-            'telefon',
-            'mobile',
-            'email',
-            'email_2',
-            'check:infomail_spontan',
-            'check:newsletter',
-            'tag:familie',
-            'tag:freunde',
-            'tag:kollegen',
-            'tag:nachbarn',
-            'tag:wanderleiter',
-            'tag:bergsportunternehmen',
-            'tag:geschaeftskollegen',
-            'tag:dienstleister',
-            'tag:linkedin',
-            'tag:unternehmen',
-            'tag:organisationen'";
-    }
-
-    private function values(): string
-    {
-        return ":id,
-            :vorname,
-            :name,
-            :strasse,
-            :plz,
-            :ort,
-            :land,
-            :telefon_geschaeftlich,
-            :telefon,
-            :mobile,
-            :email,
-            :email_2,
-            :infomail_spontan,
-            :newsletter,
-            :familie,
-            :freunde,
-            :kollegen,
-            :nachbarn,
-            :wanderleiter,
-            :bergsportunternehmen,
-            :geschaeftskollegen,
-            :dienstleister,
-            :linkedin,
-            :unternehmen,
-            :organisationen";
-    }
-
-    private function update_columns(): string
-    {
-        return "'vorname'=:vorname,
-            'name'=:name,
-            'strasse'=:strasse,
-            'plz'=:plz,
-            'ort'=:ort,
-            'land'=:land,
-            'telefon_geschaeftlich'=:telefon_geschaeftlich,
-            'telefon'=:telefon,
-            'mobile'=:mobile,
-            'email'=:email,
-            'email_2'=:email_2,
-            'check:infomail_spontan'=:infomail_spontan,
-            'check:newsletter'=:newsletter,
-            'tag:familie'=:familie,
-            'tag:freunde'=:freunde,
-            'tag:kollegen'=:kollegen,
-            'tag:nachbarn'=:nachbarn,
-            'tag:wanderleiter'=:wanderleiter,
-            'tag:bergsportunternehmen'=:bergsportunternehmen,
-            'tag:geschaeftskollegen'=:geschaeftskollegen,
-            'tag:dienstleister'=:dienstleister,
-            'tag:linkedin'=:linkedin,
-            'tag:unternehmen'=:unternehmen,
-            'tag:organisationen'=:organisationen";
+        return $val == "1";
     }
 }

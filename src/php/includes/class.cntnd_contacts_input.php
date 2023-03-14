@@ -2,8 +2,6 @@
 
 namespace Cntnd\Contacts;
 
-cInclude('module', 'vendor/autoload.php');
-
 /**
  * cntnd_contacts Class
  */
