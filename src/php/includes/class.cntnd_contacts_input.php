@@ -45,10 +45,12 @@ class CntndContactsInput
     public function headers(?string $csv, ?string $delimiter): array
     {
         if (!empty($csv) && !empty($delimiter)) {
-            $handle = fopen($csv, "r");
-            $headers = fgetcsv($handle, 1000, $delimiter);
-            fclose($handle);
-            return $headers;
+            if (file_exists($csv)) {
+                $handle = fopen($csv, "r");
+                $headers = fgetcsv($handle, 1000, $delimiter);
+                fclose($handle);
+                return $headers;
+            }
         }
         return array();
     }

@@ -31,17 +31,6 @@ $contacts = new Cntnd\Contacts\CntndContactsInput($client);
         </select>
     </div>
 
-    <fieldset <?= ($source == "db") ? "" : "disabled" ?>>
-        <legend><?= mi18n("DB") ?></legend>
-
-        <div class="form-group w-50">
-            <label for="db_source"><?= mi18n("DB_SOURCE") ?></label>
-            <select id="db_source" name="CMS_VAR[20]" size="1">
-                <option><?= mi18n("CHOOSE") ?></option>
-            </select>
-        </div>
-    </fieldset>
-
     <fieldset <?= ($source == "csv") ? "" : "disabled" ?>>
         <legend><?= mi18n("CSV") ?></legend>
         <div class="form-group w-50">

@@ -13,7 +13,7 @@ $editmode = cRegistry::isBackendEditMode();
 if ($editmode) {
     cInclude('module', 'vendor/autoload.php');
     cInclude('module', 'includes/repository.cdb.php');
-    cInclude('module', 'includes/repository.mysql.php');
+    cInclude('module', 'includes/repository.csvdb.php');
     cInclude('module', 'includes/source.newsletter.php');
     cInclude('module', 'includes/source.infomail.php');
 
@@ -31,8 +31,13 @@ if ($editmode) {
     $index = (int)"CMS_VALUE[16]";
 
     // other vars
-    //csvdb
-    $repository = new cDBRepository();
+    if ($source == "csv") {
+        //csvdb
+        $config = new CSVDB\Helpers\CSVConfig($index, $encoding, $delimiter, $headers, $cache, $history);
+        $repository = new CSVDBRepository($csv, $config);
+    } else {
+        $repository = new cDBRepository();
+    }
     $headers = [
         'Vorname',
         'Nachname',

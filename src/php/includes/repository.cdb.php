@@ -17,7 +17,7 @@ class cDBRepository implements Repository
     }
 
     /*
-     * Reihenfolge der Felder muss mit der Reihenfolge der Headers übereinstimmen! Evtl. noch Mapping einführen!
+     * Reihenfolge der Felder muss mit der Reihenfolge des Headers übereinstimmen! Evtl. noch Mapping einführen!
      */
     public function contacts(): array
     {
