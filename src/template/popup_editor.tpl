@@ -167,5 +167,13 @@
         <input type="hidden" name="editor_form_action" value="delete"/>
         <input type="hidden" name="editor_form_source"/>
         <input type="hidden" name="editor_form_index"/>
+        <input type="hidden" name="editor_form_delete"/>
+    </form>
+</div>
+<div id="update" style="visibility: hidden;">
+    <form name="addresses_form" id="addresses_form" method="post">
+        <input type="hidden" name="addresses_form_action" value="update"/>
+        <input type="hidden" name="addresses_form_update"/>
+        <input type="hidden" name="addresses_form_data"/>
     </form>
 </div>

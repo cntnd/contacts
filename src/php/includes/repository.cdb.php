@@ -16,6 +16,9 @@ class cDBRepository implements Repository
         $this->db = new \cDb;
     }
 
+    /*
+     * Reihenfolge der Felder muss mit der Reihenfolge der Headers übereinstimmen! Evtl. noch Mapping einführen!
+     */
     public function contacts(): array
     {
         $sql = "SELECT * FROM :table ORDER BY id";
@@ -61,6 +64,22 @@ class cDBRepository implements Repository
         }
     }
 
+    public function update(Contact $contact, array $where): void
+    {
+        $this->db->update(self::TABLE, $this->convert($contact), $this->update_where_stmt($where));
+    }
+
+    private function update_where_stmt(array $where): array
+    {
+        $mapped = Mapping::where_stmt($where, $this->mapping_columns());
+        $where_mapped = array();
+        foreach ($mapped as $clause) {
+            $key = key($clause);
+            $where_mapped[$key] = $clause[$key];
+        }
+        return $where_mapped;
+    }
+
     public function delete($index): void
     {
         $sql = "DELETE FROM :table WHERE " . $this->index() . "=:index ";
@@ -68,6 +87,21 @@ class cDBRepository implements Repository
             'table' => self::TABLE,
             'index' => \cSecurity::toString($index)
         );
+        $this->db->query($sql, $values);
+    }
+
+    public function delete_where(array $where): void
+    {
+        $where_mapped = Mapping::where_stmt($where, $this->mapping_columns());
+        $sql = "DELETE FROM :table WHERE ";
+        $values['table'] = self::TABLE;
+        foreach ($where_mapped as $clause) {
+            $key = key($clause);
+            $sql .= $key . "=':" . $key . "' AND ";
+            $values[$key] = $clause[$key];
+        }
+        $sql = substr($sql, 0, -4);
+
         $this->db->query($sql, $values);
     }
 
@@ -82,6 +116,41 @@ class cDBRepository implements Repository
         return (array)$this->db->getResultObject();
     }
 
+    private function select_columns(): array
+    {
+        return array_values($this->mapping_columns());
+    }
+
+    private function mapping_columns(): array
+    {
+        return [
+            'vorname' => 'vorname',
+            'name' => 'name',
+            'strasse' => 'strasse',
+            'ort' => 'ort',
+            'plz' => 'plz',
+            'land' => 'land',
+            'telefon_geschaeftlich' => 'telefon_geschaeftlich',
+            'telefon' => 'telefon',
+            'mobile' => 'mobile',
+            'email' => 'email',
+            'email_2' => 'email_2',
+            'infomail_spontan' => 'check:infomail_spontan',
+            'newsletter' => 'check:newsletter',
+            'familie' => 'tag:familie',
+            'freunde' => 'tag:freunde',
+            'kollegen' => 'tag:kollegen',
+            'nachbarn' => 'tag:nachbarn',
+            'wanderleiter' => 'tag:wanderleiter',
+            'bergsportunternehmen' => 'tag:bergsportunternehmen',
+            'geschaeftskollegen' => 'tag:geschaeftskollegen',
+            'dienstleister' => 'tag:dienstleister',
+            'linkedin' => 'tag:linkedin',
+            'unternehmen' => 'tag:unternehmen',
+            'organisationen' => 'tag:organisationen'
+        ];
+    }
+
     public function to_data(array $record): array
     {
         $reader = new ArrayReader($record);
@@ -89,8 +158,8 @@ class cDBRepository implements Repository
         $data['vorname'] = $reader->findString('vorname', Mapping::$default_string);
         $data['name'] = $reader->findString('name', Mapping::$default_string);
         $data['strasse'] = $reader->findString('strasse', Mapping::$default_string);
-        $data['plz'] = $reader->findString('plz', Mapping::$default_string);
         $data['ort'] = $reader->findString('ort', Mapping::$default_string);
+        $data['plz'] = $reader->findString('plz', Mapping::$default_string);
         $data['land'] = $reader->findString('land', Mapping::$default_string);
         $data['telefon_geschaeftlich'] = $reader->findString('telefon_geschaeftlich', Mapping::$default_string);
         $data['telefon'] = $reader->findString('telefon', Mapping::$default_string);
@@ -123,8 +192,8 @@ class cDBRepository implements Repository
         $data['vorname'] = $reader->findString('vorname', Mapping::$default_string);
         $data['name'] = $reader->findString('name', Mapping::$default_string);
         $data['strasse'] = $reader->findString('strasse', Mapping::$default_string);
-        $data['plz'] = $reader->findString('plz', Mapping::$default_string);
         $data['ort'] = $reader->findString('ort', Mapping::$default_string);
+        $data['plz'] = $reader->findString('plz', Mapping::$default_string);
         $data['land'] = $reader->findString('land', Mapping::$default_string);
         $data['telefon'] = $reader->findString('telefon', Mapping::$default_string);
         $data['telefon_geschaeftlich'] = $reader->findString('telefon_geschaeftlich', Mapping::$default_string);

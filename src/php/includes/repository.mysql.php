@@ -20,6 +20,8 @@ class MySQLRepository implements Repository
         // Database settings
         $settings['db'] = [
             'driver' => Mysql::class,
+            'encoding' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
             'quoteIdentifiers' => true,
             'timezone' => null,
             'cacheMetadata' => false,
@@ -33,11 +35,11 @@ class MySQLRepository implements Repository
                 PDO::ATTR_STRINGIFY_FETCHES => true
             ],
         ];
+
         $settings['db']['host'] = $connection['host'];
         $settings['db']['database'] = $connection['database'];
         $settings['db']['username'] = $connection['user'];
         $settings['db']['password'] = $connection['password'];
-        $settings['db']['encoding'] = $connection['charset'];
         $this->connection = new Connection($settings['db']);
     }
 
@@ -68,8 +70,8 @@ class MySQLRepository implements Repository
             'vorname',
             'name',
             'strasse',
-            'plz',
             'ort',
+            'plz',
             'land',
             'telefon_geschaeftlich',
             'telefon',
@@ -94,31 +96,36 @@ class MySQLRepository implements Repository
 
     private function select_columns(): array
     {
+        return array_values($this->mapping_columns());
+    }
+
+    private function mapping_columns(): array
+    {
         return [
-            'vorname',
-            'name',
-            'strasse',
-            'plz',
-            'ort',
-            'land',
-            'telefon_geschaeftlich',
-            'telefon',
-            'mobile',
-            'email',
-            'email_2',
-            'check:infomail_spontan',
-            'check:newsletter',
-            'tag:familie',
-            'tag:freunde',
-            'tag:kollegen',
-            'tag:nachbarn',
-            'tag:wanderleiter',
-            'tag:bergsportunternehmen',
-            'tag:geschaeftskollegen',
-            'tag:dienstleister',
-            'tag:linkedin',
-            'tag:unternehmen',
-            'tag:organisationen'
+            'vorname' => 'vorname',
+            'name' => 'name',
+            'strasse' => 'strasse',
+            'ort' => 'ort',
+            'plz' => 'plz',
+            'land' => 'land',
+            'telefon_geschaeftlich' => 'telefon_geschaeftlich',
+            'telefon' => 'telefon',
+            'mobile' => 'mobile',
+            'email' => 'email',
+            'email_2' => 'email_2',
+            'infomail_spontan' => 'check:infomail_spontan',
+            'newsletter' => 'check:newsletter',
+            'familie' => 'tag:familie',
+            'freunde' => 'tag:freunde',
+            'kollegen' => 'tag:kollegen',
+            'nachbarn' => 'tag:nachbarn',
+            'wanderleiter' => 'tag:wanderleiter',
+            'bergsportunternehmen' => 'tag:bergsportunternehmen',
+            'geschaeftskollegen' => 'tag:geschaeftskollegen',
+            'dienstleister' => 'tag:dienstleister',
+            'linkedin' => 'tag:linkedin',
+            'unternehmen' => 'tag:unternehmen',
+            'organisationen' => 'tag:organisationen'
         ];
     }
 
@@ -153,7 +160,6 @@ class MySQLRepository implements Repository
             $query->into(self::TABLE)
                 ->values($data)
                 ->execute();
-            //->lastInsertId();
         } else {
             // update
             $query = $this->newQuery()->update(self::TABLE);
@@ -161,40 +167,31 @@ class MySQLRepository implements Repository
                 ->andWhere([$this->index() => $contact->email])
                 ->execute();
         }
-
-        /*
-$query = $this->connection->prepare("INSERT INTO ".self::TABLE." SET")
-    ->bind('vorname', $contact->vorname)
-    ->bind('name', $contact->name)
-    ->bind('strasse', $contact->strasse)
-    ->bind('plz', $contact->plz)
-    ->bind('ort', $contact->ort)
-    ->bind('land', $contact->land)
-    ->bind('telefon_geschaeftlich', $contact->telefon_geschaeftlich)
-    ->bind('telefon', $contact->telefon)
-    ->bind('mobile', $contact->mobile)
-    ->bind('email', $contact->email)
-    ->bind('email_2', $contact->email_2)
-    ->bind('check:infomail_spontan', $contact->infomail_spontan)
-    ->bind('check:newsletter', $contact->newsletter)
-    ->bind('tag:familie', $contact->familie)
-    ->bind('tag:freunde', $contact->freunde)
-    ->bind('tag:kollegen', $contact->kollegen)
-    ->bind('tag:nachbarn', $contact->nachbarn)
-    ->bind('tag:wanderleiter', $contact->wanderleiter)
-    ->bind('tag:bergsportunternehmen', $contact->bergsportunternehmen)
-    ->bind('tag:geschaeftskollegen', $contact->geschaeftskollegen)
-    ->bind('tag:dienstleister', $contact->dienstleister)
-    ->bind('tag:linkedin', $contact->linkedin)
-    ->bind('tag:unternehmen', $contact->unternehmen)
-    ->bind('tag:organisationen', $contact->organisationen);*/
     }
+
+    public function update(Contact $contact, array $where): void
+    {
+        $data = $this->convert($contact);
+        $where_mapped = Mapping::where_stmt($where, $this->mapping_columns());
+        $query = $this->newQuery()->update(self::TABLE);
+        $query->set($data)
+            ->andWhere($where_mapped)
+            ->execute();
+    }
+
 
     public function delete($index): void
     {
         $query = $this->newQuery()->delete(self::TABLE);
-        $query->delete()
-            ->andWhere([$this->index() => $index])
+        $query->andWhere([$this->index() => $index])
+            ->execute();
+    }
+
+    public function delete_where(array $where): void
+    {
+        $where_mapped = Mapping::where_stmt($where, $this->mapping_columns());
+        $query = $this->newQuery()->delete(self::TABLE);
+        $query->andWhere($where_mapped)
             ->execute();
     }
 
@@ -215,8 +212,8 @@ $query = $this->connection->prepare("INSERT INTO ".self::TABLE." SET")
         $data['vorname'] = $reader->findString('vorname', Mapping::$default_string);
         $data['name'] = $reader->findString('name', Mapping::$default_string);
         $data['strasse'] = $reader->findString('strasse', Mapping::$default_string);
-        $data['plz'] = $reader->findString('plz', Mapping::$default_string);
         $data['ort'] = $reader->findString('ort', Mapping::$default_string);
+        $data['plz'] = $reader->findString('plz', Mapping::$default_string);
         $data['land'] = $reader->findString('land', Mapping::$default_string);
         $data['telefon_geschaeftlich'] = $reader->findString('telefon_geschaeftlich', Mapping::$default_string);
         $data['telefon'] = $reader->findString('telefon', Mapping::$default_string);
@@ -249,8 +246,8 @@ $query = $this->connection->prepare("INSERT INTO ".self::TABLE." SET")
         $data['vorname'] = $reader->findString('vorname', Mapping::$default_string);
         $data['name'] = $reader->findString('name', Mapping::$default_string);
         $data['strasse'] = $reader->findString('strasse', Mapping::$default_string);
-        $data['plz'] = $reader->findString('plz', Mapping::$default_string);
         $data['ort'] = $reader->findString('ort', Mapping::$default_string);
+        $data['plz'] = $reader->findString('plz', Mapping::$default_string);
         $data['land'] = $reader->findString('land', Mapping::$default_string);
         $data['telefon_geschaeftlich'] = $reader->findString('telefon_geschaeftlich', Mapping::$default_string);
         $data['telefon'] = $reader->findString('telefon', Mapping::$default_string);

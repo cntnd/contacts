@@ -31,7 +31,7 @@ if ($editmode) {
     $index = (int)"CMS_VALUE[16]";
 
     // other vars
-    //$repository = new MySQLRepository($cfg["db"]["connection"]);
+    //csvdb
     $repository = new cDBRepository();
     $headers = [
         'Vorname',
@@ -64,13 +64,15 @@ if ($editmode) {
     $newsletter = new ContenidoNewsletter();
     $infomail = new ContenidoInfomail();
     $contacts->add_source($newsletter, $infomail);
+    $count_sources = $contacts->count_sources();
 
     // module
+    //echo "<pre>";
     if ($_POST) {
-        // Dashbord & Editor
         if (array_key_exists('editor_form_action', $_POST)) {
+            // Dashbord & Editor
             if ($_POST['editor_form_action'] == Contacts\Contacts::NEW || $_POST['editor_form_action'] == Contacts\Contacts::UPDATE) {
-                $data = Contacts\Data\Contact::of($_POST, true);
+                $data = new Contacts\Data\Contact($_POST, true);
                 if (!empty($_POST['editor_form_source']) && !empty($_POST['editor_form_index'])) {
                     $contacts->upsert_source($data, $_POST['editor_form_source'], $_POST['editor_form_index']);
                 } else {
@@ -79,17 +81,28 @@ if ($editmode) {
             } elseif ($_POST['editor_form_action'] == Contacts\Contacts::DELETE) {
                 if (!empty($_POST['editor_form_source']) && !empty($_POST['editor_form_index'])) {
                     $contacts->delete_source($_POST['editor_form_source'], $_POST['editor_form_index']);
+                } else if (!empty($_POST['editor_form_delete'])) {
+                    $data = json_decode(base64_decode($_POST['editor_form_delete']), true);
+                    $contacts->delete($data);
                 }
             }
+        } elseif (array_key_exists('addresses_form_action', $_POST)) {
+            // Addresses
+            if ($_POST['addresses_form_action'] == Contacts\Contacts::UPDATE) {
+                $records = json_decode(base64_decode($_POST['addresses_form_data']), true);
+                $contacts->update($records);
+            }
         }
-        // Adressen
     }
+    //echo "</pre>";
     ?>
     <ul class="tabs" id="contacts">
-        <li class="tabs__tab active" data-toggle="tabs" data-target="contacts__content--dashboard">
+        <li class="tabs__tab  <?= ($count_sources > 0) ? "active" : "" ?>" data-toggle="tabs"
+            data-target="contacts__content--dashboard">
             <span class="tabs__tab--link">Dashboard</span>
         </li>
-        <li class="tabs__tab" data-toggle="tabs" data-target="contacts__content--contacts">
+        <li class="tabs__tab  <?= ($count_sources == 0) ? "active" : "" ?>" data-toggle="tabs"
+            data-target="contacts__content--contacts">
             <span class="tabs__tab--link">Adressen</span>
         </li>
         <li class="tabs__tab <?= ($contacts->has_history()) ? "" : "disabled" ?>" data-toggle="tabs"
@@ -99,10 +112,11 @@ if ($editmode) {
     </ul>
 
     <div class="tabs__content" id="contacts__content">
-        <div class="tabs__content--pane fade active" id="contacts__content--dashboard">
+        <div class="tabs__content--pane fade <?= ($count_sources > 0) ? "active" : "" ?>"
+             id="contacts__content--dashboard">
             <h2>Dashboard <span class="header__action new_contact">neuer Eintrag</span></h2>
 
-            <h3>Neue Einträge</h3>
+            <h3>Neue Einträge: <?= $count_sources ?></h3>
             <?php
             $sources = $contacts->load_sources();
             $has_entries = false;
@@ -147,7 +161,8 @@ if ($editmode) {
             ?>
         </div>
 
-        <div class="tabs__content--pane spreadsheet fade" id="contacts__content--contacts">
+        <div class="tabs__content--pane spreadsheet fade <?= ($count_sources == 0) ? "active" : "" ?>"
+             id="contacts__content--contacts">
             <script>
                 const data = <?= $contacts->data() ?>;
                 const columns = <?= $contacts->columns() ?>;
@@ -157,6 +172,28 @@ if ($editmode) {
 
         <div class="tabs__content--pane fade" id="contacts__content--history">
             <h2>History</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Datei</th>
+                    <th>Datum</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php
+                $files = $contacts->history();
+                foreach ($files as $filename => $file) {
+                    if (is_file($file)) {
+                        $download_file = str_replace(__DIR__, "", $file);
+                        echo "<tr>";
+                        echo '<td><a href="' . $download_file . '" target="_blank">' . $filename . '</a></td>';
+                        echo '<td>' . date("d.m.Y H:i:s", filectime($file)) . '</td>';
+                        echo "</tr>\n";
+                    }
+                }
+                ?>
+                </tbody>
+            </table>
         </div>
     </div>
     <?php

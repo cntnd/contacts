@@ -27,8 +27,6 @@ $(document).ready(function () {
       }
     });
 
-    console.log(json)
-
     if (json["_diff"] !== undefined) {
       $.each(json["_diff"], function (key) {
         $('form[name="editor_form"] input[name="' + key + '"]').addClass("highlight");
@@ -86,17 +84,12 @@ $(document).ready(function () {
     }
   }
 
-  function deleteEntry(index) {
-    // https://api.jquery.com/submit/
-    //$().submit()
-  }
-
   $.getJSON("https://cdn.jsdelivr.net/npm/jexcel@4.6.1/lang/de_DE.json", function (text) {
     let options = {
       data: data,
       columns: columns,
       tableOverflow: true,
-      tableWidth: $(".tabs__content--pane").innerWidth(),
+      tableWidth: $(".tabs__content").innerWidth(),
       tableHeight: '600px',
       defaultColWidth: 120,
       defaultColAlign: 'left',
@@ -112,23 +105,15 @@ $(document).ready(function () {
       text: text,
       toolbar: [{
         type: 'i',
-        content: 'add_circle',
+        content: 'note_add',
         onclick: function () {
           $('#editor').toggleClass('active');
         }
       }, {
         type: 'i',
         content: 'save',
-        onclick: function (instance) {
-          console.log('store');
-          var data = table.getData();
-          console.log(data);
-        }
-      }, {
-        type: 'i',
-        content: 'sync',
         onclick: function () {
-          console.log('sync');
+          store(table.getData());
         }
       }, {
         type: 'i',
@@ -149,26 +134,51 @@ $(document).ready(function () {
           table.redo();
         }
       }],
-      onchange: function (instance, cell, x, y, value) {
-        console.log("CHANGE", x, y, value);
+      onchange: function (instance, cell, x, row, value) {
+        changeEntry(row)
       },
-      ondeleterow: function (instance, row, amount, value) {
-        console.log("delete", row, amount, "index first row", value[0][9].innerHTML);
-        alert('delete');
-      }
+      ondeleterow: deleteEntry
     }
 
     let table = $('#spreadsheet').jspreadsheet(options);
   });
 
-  $('#store_spreadsheet').click(function() {
-    var data = table.getData();
-    /*
-    var headers = table.getHeaders();
-    $('#cntnd_spreadsheet-csv').val(Base64.encode(JSON.stringify(data)));
-    $('#cntnd_spreadsheet-headers').val(Base64.encode(JSON.stringify(headers)));
-    return true;
+  function store(data) {
+    let identifier = $('form[name=addresses_form] input[name="addresses_form_update"]');
+    let records = JSON.parse(window.atob(identifier.val()));
 
-     */
-  });
+    let map = [];
+    $(records).each(function () {
+      map.push(data[this]);
+    });
+
+    let b64 = window.btoa(JSON.stringify(map));
+    $('form[name=addresses_form] input[name="addresses_form_data"]').val(b64);
+    $('form[name=addresses_form]').submit();
+  }
+
+  function changeEntry(row) {
+    let identifier = $('form[name=addresses_form] input[name="addresses_form_update"]');
+    let map = [];
+    if (identifier.val() !== "") {
+      map = JSON.parse(window.atob(identifier.val()));
+    }
+    map.push(row);
+    let b64 = window.btoa(JSON.stringify(map));
+    identifier.val(b64);
+  }
+
+  var deleteEntry = function deleteEntry(instance, row, amount, value) {
+    let json = [];
+    $.each(value, function () {
+      let email = this[9].innerHTML;
+      let mobile = this[8].innerHTML;
+      let telefon = this[7].innerHTML;
+      json.push([{"email": email}, {"mobile": mobile}, {"telefon": telefon}]);
+    });
+
+    let b64 = window.btoa(JSON.stringify(json));
+    $('form[name=delete_form] input[name="editor_form_delete"]').val(b64);
+    $('form[name=delete_form]').submit();
+  }
 });

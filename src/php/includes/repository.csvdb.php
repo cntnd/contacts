@@ -65,14 +65,68 @@ class CSVDBRepository implements Repository
      * @throws InvalidArgument
      * @throws Exception
      */
+    public function update(Contact $contact, array $where): void
+    {
+        $data = $this->convert($contact);
+        $where_mapped = Mapping::where_stmt($where, $this->mapping_columns());
+        $this->csvdb->update($data, $where_mapped);
+    }
+
+    /**
+     * @throws InvalidArgument
+     * @throws Exception
+     */
     public function delete($index): void
     {
         $this->csvdb->delete([$this->index() => $index]);
     }
 
+    /**
+     * @throws InvalidArgument
+     * @throws Exception
+     */
+    public function delete_where(array $where): void
+    {
+        $where_mapped = Mapping::where_stmt($where, $this->mapping_columns());
+        $this->csvdb->delete($where_mapped);
+    }
+
+    private function mapping_columns(): array
+    {
+        return [
+            'vorname' => 'Vorname',
+            'name' => 'Nachname',
+            'strasse' => 'Strasse',
+            'plz' => 'PLZ',
+            'ort' => 'Ort',
+            'land' => 'Land',
+            'telefon_geschaeftlich' => 'Telefon geschäftlich',
+            'telefon' => 'Telefon',
+            'mobile' => 'Mobiltelefon',
+            'email' => 'E-Mail',
+            'email_2' => 'E-Mail 2',
+            'infomail_spontan' => 'Check:Infomail Spontan',
+            'newsletter' => 'Check:Newsletter',
+            'familie' => 'Tag:Familie',
+            'freunde' => 'Tag:Freunde',
+            'kollegen' => 'Tag:Kollegen',
+            'nachbarn' => 'Tag:Nachbarn',
+            'wanderleiter' => 'Tag:Wanderleiter',
+            'bergsportunternehmen' => 'Tag:Bergsportunternehmen',
+            'geschaeftskollegen' => 'Tag:Geschäftskollegen',
+            'dienstleister' => 'Tag:Dienstleister',
+            'linkedin' => 'Tag:linkedin',
+            'unternehmen' => 'Tag:Unternehmen',
+            'organisationen' => 'Tag:Organisationen'
+        ];
+    }
+
     public function exists($index): array
     {
         $exist = $this->csvdb->select()->where([$this->index() => $index])->get();
+        if (!$exist) {
+            return array();
+        }
         return $exist[0];
     }
 
@@ -89,7 +143,7 @@ class CSVDBRepository implements Repository
         $data['telefon_geschaeftlich'] = $reader->findString('Telefon geschäftlich', Mapping::$default_string);
         $data['telefon'] = $reader->findString('Telefon', Mapping::$default_string);
         $data['mobile'] = $reader->findString('Mobiltelefon', Mapping::$default_string);
-        $data['email'] = $reader->findString('E-Mail');
+        $data['email'] = $reader->findString('E-Mail', Mapping::$default_string);
         $data['email_2'] = $reader->findString('E-Mail 2', Mapping::$default_string);
 
         $data['infomail_spontan'] = Mapping::x_to_bool($reader->findString('Check:Infomail Spontan', Mapping::$default_string));
