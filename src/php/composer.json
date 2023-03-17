@@ -1,6 +1,6 @@
 {
   "require": {
-    "apollo29/contacts": "^0.0.9",
+    "apollo29/contacts": "^1.0.0",
     "cakephp/database": "^4",
     "ext-json": "*",
     "ext-pdo": "*"

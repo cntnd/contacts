@@ -116,12 +116,7 @@ class cDBRepository implements Repository
         return (array)$this->db->getResultObject();
     }
 
-    private function select_columns(): array
-    {
-        return array_values($this->mapping_columns());
-    }
-
-    private function mapping_columns(): array
+    public function mapping_columns(): array
     {
         return [
             'vorname' => 'vorname',

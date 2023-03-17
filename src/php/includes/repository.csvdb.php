@@ -91,7 +91,7 @@ class CSVDBRepository implements Repository
         $this->csvdb->delete($where_mapped);
     }
 
-    private function mapping_columns(): array
+    public function mapping_columns(): array
     {
         return [
             'vorname' => 'Vorname',

@@ -99,7 +99,7 @@ class MySQLRepository implements Repository
         return array_values($this->mapping_columns());
     }
 
-    private function mapping_columns(): array
+    public function mapping_columns(): array
     {
         return [
             'vorname' => 'vorname',
