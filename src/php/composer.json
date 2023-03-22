@@ -2,7 +2,9 @@
   "require": {
     "apollo29/contacts": "^1.0.0",
     "cakephp/database": "^4",
+    "parsecsv/php-parsecsv": "^1.2",
     "ext-json": "*",
-    "ext-pdo": "*"
+    "ext-pdo": "*",
+    "ext-zip": "*"
   }
 }

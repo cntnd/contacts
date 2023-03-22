@@ -54,6 +54,31 @@ class CntndContactsInput
         }
         return array();
     }
+
+    public function folders(): array
+    {
+        $folders = array();
+        $folders = $this->_getAllSubdirectories("", $folders);
+        return $folders;
+    }
+
+    private function _getAllSubdirectories($directoryPath, array $directories) {
+        $cfgClient = \cRegistry::getClientConfig();
+        $path = $cfgClient[$this->client]["upl"]["path"];
+
+        $handle = \cDirHandler::read($path . $directoryPath . '/', false, true);
+
+        if (false !== $handle) {
+            foreach ($handle as $entry) {
+                if (\cFileHandler::fileNameBeginsWithDot($entry) === false) {
+                    $directories[] = $directoryPath . '/' . $entry;
+                    $directories = $this->_getAllSubdirectories($directoryPath . '/' . $entry, $directories);
+                }
+            }
+        }
+
+        return $directories;
+    }
 }
 
 ?>

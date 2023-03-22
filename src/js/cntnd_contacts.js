@@ -1,6 +1,6 @@
 /* cntnd_contacts */
 $(document).ready(function () {
-  $(".new_contact").click(function (){
+  $(".new_contact").click(function () {
     $("#editor").addClass('active');
   });
 
@@ -73,8 +73,6 @@ $(document).ready(function () {
     // validation?
     let overlay = $(this).parent(".popup").parent(".overlay");
     closePopup(overlay);
-
-    console.log("editor submit");
     return true;
   });
 

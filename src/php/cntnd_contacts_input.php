@@ -15,10 +15,10 @@ $headers = (bool)"CMS_VALUE[13]";
 $cache = (bool)"CMS_VALUE[14]";
 $history = (bool)"CMS_VALUE[15]";
 $index = (int)"CMS_VALUE[16]";
+$mailchimp_folder = "CMS_VALUE[20]";
 
 // other vars
 $contacts = new Cntnd\Contacts\CntndContactsInput($client);
-
 ?>
 <div class="form-vertical">
 
@@ -112,6 +112,24 @@ $contacts = new Cntnd\Contacts\CntndContactsInput($client);
             </div>
 
         </fieldset>
+    </fieldset>
+
+
+    <fieldset>
+        <legend><?= mi18n("MAILCHIMP") ?></legend>
+        <div class="form-group w-50">
+            <label for="mailchimp" title="<?= mi18n("MAILCHIMP_INFO") ?>"><?= mi18n("MAILCHIMP_FOLDER") ?></label>
+            <select id="mailchimp" name="CMS_VAR[20]" size="1">
+                <option><?= mi18n("CHOOSE") ?></option>
+                <?php
+                $folders = $contacts->folders();
+                foreach ($folders as $folder) {
+                    $selected = ($mailchimp_folder == $folder) ? "selected" : "";
+                    echo "<option value=\"" . $folder . "\" $selected>" . $folder . "</option>";
+                }
+                ?>
+            </select>
+        </div>
     </fieldset>
 </div>
 <?php

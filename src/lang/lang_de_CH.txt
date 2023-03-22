@@ -15,3 +15,6 @@ HISTORY=History
 HISTORY_INFO=Aktivieren wenn bei jeder Manipluation eine Sicherkungskopie erstellt werden soll (Achtung Speicherplatz!)
 INDEX=Index Feld
 DB_SOURCE=Datenbank Quelle
+MAILCHIMP=Mailchimp
+MAILCHIMP_FOLDER=Dateiordner
+MAILCHIMP_INFO=In diesem Dateiordner werden die Exporte aus Mailchimp abgelegt

@@ -16,6 +16,7 @@ if ($editmode) {
     cInclude('module', 'includes/repository.csvdb.php');
     cInclude('module', 'includes/source.newsletter.php');
     cInclude('module', 'includes/source.infomail.php');
+    cInclude('module', 'includes/source.mailchimp.php');
 
     cInclude('module', 'includes/script.cntnd_contacts.php');
     cInclude('module', 'includes/style.cntnd_contacts.php');
@@ -29,6 +30,7 @@ if ($editmode) {
     $cache = (bool)"CMS_VALUE[14]";
     $history = (bool)"CMS_VALUE[15]";
     $index = (int)"CMS_VALUE[16]";
+    $mailchimp_folder = "CMS_VALUE[20]";
 
     // other vars
     if ($source == "csv") {
@@ -69,7 +71,16 @@ if ($editmode) {
     $newsletter = new ContenidoNewsletter();
     $infomail = new ContenidoInfomail();
     $contacts->add_source($newsletter, $infomail);
-    $count_sources = $contacts->count_sources();
+    if (!empty($mailchimp_folder)){
+        $cfgClient = \cRegistry::getClientConfig();
+        $path = $cfgClient[$client]["upl"]["path"];
+        try {
+            $mailchimp = new Mailchimp($path.$mailchimp_folder);
+            $contacts->add_source($mailchimp);
+        } catch (Exception $e) {
+            echo '<div class="cntnd_alert cntnd_alert-danger">Es gibt ein Problem mit der Mailchimp Quelle: '.$e.'</div>';
+        }
+    }
 
     // module
     //echo "<pre>";
@@ -100,6 +111,8 @@ if ($editmode) {
         }
     }
     //echo "</pre>";
+    // load sources
+    $count_sources = $contacts->count_sources();
     ?>
     <ul class="tabs" id="contacts">
         <li class="tabs__tab  <?= ($count_sources > 0) ? "active" : "" ?>" data-toggle="tabs"
