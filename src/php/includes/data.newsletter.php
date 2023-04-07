@@ -6,8 +6,8 @@ use Selective\ArrayReader\ArrayReader;
 
 class Newsletter implements Data
 {
-    public string $vorname;
     public string $name;
+    public string $vorname;
     public string $strasse;
     public string $plz;
     public string $ort;
@@ -28,8 +28,8 @@ class Newsletter implements Data
     {
         $reader = new ArrayReader($data);
 
-        $this->vorname = $reader->findString('vorname', Mapping::$default_string);
         $this->name = $reader->findString('name', Mapping::$default_string);
+        $this->vorname = $reader->findString('vorname', Mapping::$default_string);
         $this->strasse = $reader->findString('strasse', Mapping::$default_string);
         $this->plz = $reader->findString('plz', Mapping::$default_string);
         $this->ort = $reader->findString('ort', Mapping::$default_string);

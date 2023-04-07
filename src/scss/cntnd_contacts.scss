@@ -1,4 +1,5 @@
 @import url('https://rsms.me/inter/inter.css');
+@import url('https://cdn.jsdelivr.net/gh/cntnd/core_style@1.2.0/dist/core_style.css');
 
 :root {
   --popup-margin: 50px auto;
@@ -24,10 +25,13 @@ a:active {
   color: var(--btn-color-dark);
 }
 
-a.header__action {
+.header__action {
   font-size: smaller;
   font-weight: 500;
   margin-left: .5rem;
+  color: var(--btn-color-base);
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 a.material-symbols-outlined {
@@ -42,6 +46,15 @@ a.material-symbols-outlined {
   margin-bottom: 10px;
 }
 
+.card--list .card-body {
+  border-bottom: 1px solid rgba(0,0,0,.125);
+}
+.card--list .card-body:last-child {
+  border-bottom: none;
+}
+.card--list .card-body:nth-child(even) {
+  background: rgba(0,0,0,.01);
+}
 .popup {
   margin: 10px auto !important;
 }
@@ -87,11 +100,28 @@ a.material-symbols-outlined {
 }
 
 .add_contact,
-.remove_contact {
+.remove_contact,
+.popup .close {
   cursor: pointer;
 }
 
-.jexcel_content,
-.jexcel_container {
+#exampleParent {
+  height: 80%;
+  overflow: hidden;
   width: 100%;
+}
+
+.spreadsheet__toolbar {
+  background-color: rgba(0,0,0,.05);
+  border: 1px solid rgba(0,0,0,.125);
+  margin-bottom: .5rem;
+  padding: .25rem;
+
+  display: flex;
+}
+.spreadsheet__toolbar * {
+  margin-right: .5rem;
+}
+.spreadsheet__toolbar input {
+  height: 2rem;
 }

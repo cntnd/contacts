@@ -45,6 +45,12 @@ class ContenidoNewsletter implements Source
             'table' => self::TABLE,
             'index' => \cSecurity::toString($index)
         );
-        $this->db->query($sql, $values);
+        // todo
+        //$this->db->query($sql, $values);
+    }
+
+    public function headers(): array
+    {
+        return array_keys(get_class_vars(Newsletter::class));
     }
 }

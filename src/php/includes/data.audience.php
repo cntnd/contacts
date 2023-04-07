@@ -6,8 +6,8 @@ use Selective\ArrayReader\ArrayReader;
 
 class Audience implements Data
 {
-    public string $vorname;
     public string $name;
+    public string $vorname;
     public string $email;
     public bool $newsletter;
     public string $timestamp;
@@ -21,8 +21,8 @@ class Audience implements Data
     {
         $reader = new ArrayReader($data);
 
-        $this->vorname = $reader->findString('First Name', $reader->findString('vorname', Mapping::$default_string));
         $this->name = $reader->findString('Last Name', $reader->findString('name', Mapping::$default_string));
+        $this->vorname = $reader->findString('First Name', $reader->findString('vorname', Mapping::$default_string));
         $this->email = $reader->findString('Email Address', $reader->findString('email', Mapping::$default_string));
         $this->newsletter = !$unsubscribe;
         $this->timestamp = $timestamp;

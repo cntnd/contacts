@@ -1,12 +1,9 @@
 <?php
 
-use Contacts\Data\Contact;
-use Contacts\Data\Data;
 use Contacts\Data\Mapping;
 use Contacts\Repository\Repository;
-use Selective\ArrayReader\ArrayReader;
 
-class cDBRepository implements Repository
+class cDBRepository extends Repository
 {
     private $db;
     const TABLE = "adressdatenbank_test";
@@ -28,7 +25,7 @@ class cDBRepository implements Repository
         $this->db->query($sql, $values);
         $data = [];
         while ($this->db->next_record()) {
-            $data[] = $this->to_data($this->db->toArray());
+            $data[] = $this->to_record($this->db->toArray(), $this->mapping_columns());
         }
         return $data;
     }
@@ -50,23 +47,23 @@ class cDBRepository implements Repository
         return "email";
     }
 
-    public function upsert(Contact $contact): void
+    public function upsert(array $contact): void
     {
-        $exist = $this->exists($contact->email);
-        $values = $this->convert($contact);
+        $exist = $this->exists($contact[$this->index()]);
+        $values = $this->to_record($contact);
         if (count($exist) == 0) {
             // insert
             $values['id'] = "NULL";
             $this->db->insert(self::TABLE, $values);
         } else {
             // update
-            $this->db->update(self::TABLE, $values, [$this->index() => $contact->email]);
+            $this->db->update(self::TABLE, $values, [$this->index() => $contact[$this->index()]]);
         }
     }
 
-    public function update(Contact $contact, array $where): void
+    public function update(array $contact, array $where): void
     {
-        $this->db->update(self::TABLE, $this->convert($contact), $this->update_where_stmt($where));
+        $this->db->update(self::TABLE, $this->to_record($contact), $this->update_where_stmt($where));
     }
 
     private function update_where_stmt(array $where): array
@@ -146,6 +143,7 @@ class cDBRepository implements Repository
         ];
     }
 
+    /*
     public function to_data(array $record): array
     {
         $reader = new ArrayReader($record);
@@ -212,10 +210,27 @@ class cDBRepository implements Repository
         $data['tag:organisationen'] = Mapping::x_to_bool($reader->findString('organisationen', Mapping::$default_string));
         return $data;
     }
-
+    */
 
     public static function string_to_bool(string $val): bool
     {
         return $val == "1";
+    }
+
+    public function headers(): array
+    {
+        // TODO: Implement headers() method.
+        return array();
+    }
+
+    public function data_types(): array
+    {
+        // TODO: Implement data_types() method.
+        return array();
+    }
+
+    public function dump(string $records): void
+    {
+        // TODO: Implement dump() method.
     }
 }

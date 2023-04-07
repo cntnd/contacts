@@ -102,4 +102,9 @@ class Mailchimp implements Source
     {
         $this->csvdb->delete(["email"=>$index]);
     }
+
+    public function headers(): array
+    {
+        return array_keys(get_class_vars(Audience::class));
+    }
 }

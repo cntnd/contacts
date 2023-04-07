@@ -13,23 +13,32 @@ $(document).ready(function () {
     let json = JSON.parse(window.atob(data));
     $('form[name="editor_form"] .editor_form_remove').show();
 
+    console.log(json);
+
     $('form[name="editor_form"] :input').each(function () {
       $(this).removeClass("highlight");
       let input = $(this).attr("name");
-      let type = $(this).attr("type");
-      let value = json[input];
-      if (value !== undefined) {
-        if (type === "checkbox" || type === "radio") {
-          $(this).prop("checked", value);
-        } else {
-          $(this).val(value);
+      if (input!==undefined && input.startsWith('data')) {
+        let type = $(this).attr("type");
+
+        let value = undefined;
+        var matches = input.match(/\[(.*?)]/);
+        if (matches) {
+          value = json[matches[1]];
+        }
+        if (value !== undefined) {
+          if (type === "checkbox" || type === "radio") {
+            $(this).prop("checked", value);
+          } else {
+            $(this).val(value);
+          }
         }
       }
     });
 
     if (json["_diff"] !== undefined) {
       $.each(json["_diff"], function (key) {
-        $('form[name="editor_form"] input[name="' + key + '"]').addClass("highlight");
+        $('form[name="editor_form"] input[name="data[' + key + ']"]').addClass("highlight");
       });
     }
 
@@ -73,6 +82,8 @@ $(document).ready(function () {
     // validation?
     let overlay = $(this).parent(".popup").parent(".overlay");
     closePopup(overlay);
+
+    console.log("editor submit");
     return true;
   });
 
@@ -82,101 +93,48 @@ $(document).ready(function () {
     }
   }
 
-  $.getJSON("https://cdn.jsdelivr.net/npm/jexcel@4.6.1/lang/de_DE.json", function (text) {
-    let options = {
-      data: data,
-      columns: columns,
-      tableOverflow: true,
-      tableWidth: $(".tabs__content").innerWidth(),
-      tableHeight: '600px',
-      defaultColWidth: 120,
-      defaultColAlign: 'left',
-      filters: true,
-      allowManualInsertColumn: false,
-      allowInsertColumn: false,
-      allowInsertRow: false,
-      allowManualInsertRow: false,
-      allowDeleteColumn: false,
-      allowManualDeleteColumn: false,
-      search: true,
-      csvFileName: 'Adressen',
-      text: text,
-      toolbar: [{
-        type: 'i',
-        content: 'note_add',
-        onclick: function () {
-          $('#editor').toggleClass('active');
-        }
-      }, {
-        type: 'i',
-        content: 'save',
-        onclick: function () {
-          store(table.getData());
-        }
-      }, {
-        type: 'i',
-        content: 'download',
-        onclick: function () {
-          table.download();
-        }
-      }, {
-        type: 'i',
-        content: 'undo',
-        onclick: function () {
-          table.undo();
-        }
-      }, {
-        type: 'i',
-        content: 'redo',
-        onclick: function () {
-          table.redo();
-        }
-      }],
-      onchange: function (instance, cell, x, row, value) {
-        changeEntry(row)
-      },
-      ondeleterow: deleteEntry
-    }
-
-    let table = $('#spreadsheet').jspreadsheet(options);
+  const container = document.querySelector('#example')
+  const searchField = document.querySelector('#search_field');
+  const hot = new Handsontable(container, {
+    data: data_handsontable,
+    columns: columns_handsontable,
+    rowHeaders: true,
+    colHeaders: headers,
+    multiColumnSorting: true,
+    dropdownMenu: true,
+    contextMenu: true,
+    filters: true,
+    search: true,
+    language: 'de-CH',
+    licenseKey: 'non-commercial-and-evaluation'
   });
 
-  function store(data) {
-    let identifier = $('form[name=addresses_form] input[name="addresses_form_update"]');
-    let records = JSON.parse(window.atob(identifier.val()));
+  // add a search input listener
+  searchField.addEventListener('keyup', function (event) {
+    const search = hot.getPlugin('search');
+    search.query(event.target.value);
+    hot.render();
+  });
 
-    let map = [];
-    $(records).each(function () {
-      map.push(data[this]);
+  const exportPlugin = hot.getPlugin('exportFile');
+  $('.export_csv').click(function () {
+    exportPlugin.downloadFile('csv', {filename: 'Adressdatenbank'});
+  });
+
+  $('.store_csv').click(function () {
+    // clear filters to get all data
+    hot.getPlugin('Filters').clearConditions();
+    hot.getPlugin('Filters').filter();
+    hot.render();
+
+    let csv_string = exportPlugin.exportAsString('csv', {
+      exportHiddenRows: true,
+      exportHiddenColumns: true,
+      columnHeaders: true,
+      columnDelimiter: ';'
     });
 
-    let b64 = window.btoa(JSON.stringify(map));
-    $('form[name=addresses_form] input[name="addresses_form_data"]').val(b64);
+    $('form[name=addresses_form] input[name="addresses_form_data"]').val(csv_string);
     $('form[name=addresses_form]').submit();
-  }
-
-  function changeEntry(row) {
-    let identifier = $('form[name=addresses_form] input[name="addresses_form_update"]');
-    let map = [];
-    if (identifier.val() !== "") {
-      map = JSON.parse(window.atob(identifier.val()));
-    }
-    map.push(row);
-    let b64 = window.btoa(JSON.stringify(map));
-    identifier.val(b64);
-  }
-
-  var deleteEntry = function deleteEntry(instance, row, amount, value) {
-    let json = [];
-    $.each(value, function () {
-      let email = this[9].innerHTML;
-      let mobile = this[8].innerHTML;
-      let telefon = this[7].innerHTML;
-      json.push([{"email": email}, {"mobile": mobile}, {"telefon": telefon}]);
-    });
-
-    let b64 = window.btoa(JSON.stringify(json));
-    $('form[name=delete_form] input[name="editor_form_delete"]').val(b64);
-    $('form[name=delete_form]').submit();
-  }
+  });
 });
