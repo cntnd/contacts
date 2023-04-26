@@ -68,13 +68,13 @@ if ($editmode) {
             if ($_POST['editor_form_action'] == Contacts\Contacts::NEW || $_POST['editor_form_action'] == Contacts\Contacts::UPDATE) {
                 $data = Contacts\Data\Mapping::stripslashes($_POST['data']);
                 if (!empty($_POST['editor_form_source']) && !empty($_POST['editor_form_index'])) {
-                    $contacts->upsert_source($data, $_POST['editor_form_source'], $_POST['editor_form_index']);
+                    $contacts->upsert_source($data, $_POST['editor_form_source'], $_POST['editor_form_index'], $idart);
                 } else {
                     $contacts->upsert($data);
                 }
             } elseif ($_POST['editor_form_action'] == Contacts\Contacts::DELETE) {
                 if (!empty($_POST['editor_form_source']) && !empty($_POST['editor_form_index'])) {
-                    $contacts->delete_source($_POST['editor_form_source'], $_POST['editor_form_index']);
+                    $contacts->delete_source($_POST['editor_form_source'], $_POST['editor_form_index'], $idart);
                 } else if (!empty($_POST['editor_form_delete'])) {
                     $data = json_decode(base64_decode($_POST['editor_form_delete']), true);
                     $contacts->delete($data);

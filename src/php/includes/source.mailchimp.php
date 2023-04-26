@@ -98,9 +98,9 @@ class Mailchimp implements Source
         return "Mailchimp";
     }
 
-    public function archive($index): void
+    public function archive($index, $key = null): void
     {
-        $this->csvdb->delete(["email"=>$index]);
+        $this->csvdb->delete(["email" => $index]);
     }
 
     public function headers(): array
