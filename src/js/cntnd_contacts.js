@@ -1,5 +1,10 @@
 /* cntnd_contacts */
 $(document).ready(function () {
+    let height = $(document).height();
+    let offset = $(".tabs__content").offset();
+    let pane_height = height - offset.top - 100;
+    $("#exampleParent").css("height",pane_height);
+
     $(".new_contact").click(function () {
         $("#editor").addClass('active');
     });
