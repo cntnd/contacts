@@ -27,7 +27,7 @@ class CntndContactsOutput extends CntndUtil
 
         // mappings
         foreach ($data['mappings'] as $source => $mappings) {
-            $this->store_mappings($mappings, $source);
+            $this->store_mappings(array_filter($mappings), $source);
         }
     }
 

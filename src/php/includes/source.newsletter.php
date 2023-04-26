@@ -45,8 +45,7 @@ class ContenidoNewsletter implements Source
             'table' => self::TABLE,
             'index' => \cSecurity::toString($index)
         );
-        // todo
-        //$this->db->query($sql, $values);
+        $this->db->query($sql, $values);
     }
 
     public function headers(): array
