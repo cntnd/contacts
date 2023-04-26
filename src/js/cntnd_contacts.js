@@ -29,6 +29,7 @@ $(document).ready(function () {
                         $(this).prop("checked", value);
                     } else {
                         $(this).val(value);
+                        $(this).attr("data-value", value);
                     }
                 }
             }
@@ -37,8 +38,8 @@ $(document).ready(function () {
         if (json["_diff"] !== undefined) {
             $.each(json["_diff"], function (key, value) {
                 $('form[name="editor_form"] input[name="data[' + key + ']"]').addClass("highlight");
-                $('form[name="editor_form"] input[name="data[' + key + ']"]').attr("data-diff",value);
-                $('form[name="editor_form"] input[name="data[' + key + ']"]').attr("data-diff-key",key);
+                $('form[name="editor_form"] input[name="data[' + key + ']"]').attr("data-diff", value);
+                $('form[name="editor_form"] input[name="data[' + key + ']"]').attr("data-diff-key", key);
             });
         }
 
@@ -49,7 +50,17 @@ $(document).ready(function () {
     });
 
     $(".input--button__action").click(function () {
-        console.log($(this).data("diff"), $(this).data("diff-key"));
+        let input = $(this).parent().find("input");
+        let is_diff = input.val() === input.data("diff"); // means original value
+        let no_diff = input.data("diff") === input.data("value");
+
+        if (is_diff) {
+            input.addClass("highlight");
+            input.val(input.data("value"));
+        } else {
+            input.removeClass("highlight");
+            input.val(input.data("diff"));
+        }
     });
 
     $(".editor_form_remove").click(function () {
@@ -66,7 +77,7 @@ $(document).ready(function () {
         $('form[name="delete_form"]').submit();
     });
 
-    $(".mapping_form_remove").click(function (){
+    $(".mapping_form_remove").click(function () {
         $('form[name="mapping_form"] input[name="mapping_form_action"]').val("delete");
         $('form[name="mapping_form"]').submit();
     });
