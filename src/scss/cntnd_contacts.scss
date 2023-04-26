@@ -3,7 +3,7 @@
 
 :root {
   --popup-margin: 50px auto;
-  --popup-width: 65%;
+  --popup-width: 75%;
   --popup-content-height: calc(90% - 100px);
 }
 
@@ -47,14 +47,17 @@ a.material-symbols-outlined {
 }
 
 .card--list .card-body {
-  border-bottom: 1px solid rgba(0,0,0,.125);
+  border-bottom: 1px solid rgba(0, 0, 0, .125);
 }
+
 .card--list .card-body:last-child {
   border-bottom: none;
 }
+
 .card--list .card-body:nth-child(even) {
-  background: rgba(0,0,0,.01);
+  background: rgba(0, 0, 0, .01);
 }
+
 .popup {
   margin: 10px auto !important;
 }
@@ -95,10 +98,27 @@ a.material-symbols-outlined {
   width: 23%;
 }
 
+.input--button {
+  display: flex;
+
+  input {
+    width: calc(100% - 36px);
+  }
+}
+
+.input--button__action {
+  background: rgba(0,0,0,.125);
+  border: 2px solid rgba(0,0,0,.75);
+  cursor: pointer;
+}
+
 .tabs__content--pane.spreadsheet {
   padding: 1px 0;
 }
 
+.new_contact,
+.store_csv,
+.export_csv,
 .add_contact,
 .remove_contact,
 .popup .close {
@@ -112,16 +132,18 @@ a.material-symbols-outlined {
 }
 
 .spreadsheet__toolbar {
-  background-color: rgba(0,0,0,.05);
-  border: 1px solid rgba(0,0,0,.125);
+  background-color: rgba(0, 0, 0, .05);
+  border: 1px solid rgba(0, 0, 0, .125);
   margin-bottom: .5rem;
   padding: .25rem;
 
   display: flex;
 }
+
 .spreadsheet__toolbar * {
   margin-right: .5rem;
 }
+
 .spreadsheet__toolbar input {
   height: 2rem;
 }

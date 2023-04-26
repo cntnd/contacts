@@ -1,6 +1,6 @@
 {
   "name": "cntnd_contacts",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Contacts Module",
   "devDependencies": {
     "del": "^5.1.0",

@@ -33,15 +33,8 @@ if ($editmode) {
 
     // other vars
     $output = new \Cntnd\Contacts\CntndContactsOutput($idart);
-    $required = $output->required();
-    if (empty($required)) {
-        $required = array("Nachname", "Vorname", "E-Mail-Adresse");
-    }
     $mappings = $output->source_mappings();
-    if (empty($mappings)) {
-        $mappings[ContenidoNewsletter::class] = array("Nachname" => "name", "Vorname" => "vorname", "Strasse" => "strasse", "PLZ" => "plz", "Ort" => "ort", "E-Mail-Adresse" => "email", "Infomail Spontan" => "infomail_spontan", "Newsletter" => "newsletter");
-        $mappings[Mailchimp::class] = array("Nachname" => "name", "Vorname" => "vorname", "E-Mail-Adresse" => "email", "Newsletter" => "newsletter");
-    }
+    $required = $output->required();
 
     if ($source == "csv") {
         //csvdb
@@ -90,15 +83,22 @@ if ($editmode) {
         } elseif (array_key_exists('addresses_form_action', $_POST)) {
             // Addresses
             if ($_POST['addresses_form_action'] == Contacts\Contacts::DUMP) {
-                $contacts->dump($_POST['addresses_form_data']);
+                $records = base64_decode($_POST['addresses_form_data']);
+                $contacts->dump($records);
             }
         } elseif (array_key_exists('mapping_form_action', $_POST)) {
             // Mappings
-            $output->store($_POST['data']);
+            if ($_POST['mapping_form_action'] == Contacts\Contacts::UPDATE) {
+                $output->store($_POST['data']);
 
-            $required = $output->required();
-            $mappings = $output->source_mappings();
-            $contacts->update_data_types($output->data_types());
+                $required = $output->required();
+                $mappings = $output->source_mappings();
+                $contacts->update_data_types($output->data_types());
+            } elseif ($_POST['mapping_form_action'] == Contacts\Contacts::DELETE) {
+                $output->delete();
+                $required = array();
+                $mappings = array();
+            }
         }
     }
     echo "</pre>";
@@ -138,17 +138,17 @@ if ($editmode) {
             <h3>Neue Einträge: <?= $count_sources ?></h3>
             <?php
             $sources = $contacts->load_sources();
-            $has_entries = false;
-            foreach ($sources as $source => $records) {
-                foreach ($records["data"] as $record) {
-                    $has_entries = true;
-                    if ($record instanceof Contacts\Data\Data) {
-                        $uuid = rand();
-                        $exist = $contacts->exists($record->email);
-                        $merge = $contacts->merge($record, $exist, $mappings[$source]);
-                        $base64 = base64_encode(json_encode($merge));
-                        ?>
-                        <div class="card">
+            $has_entries = $count_sources > 0;
+            if ($has_entries && !empty($mappings)) {
+                echo '<div class="card card--list">';
+                foreach ($sources as $source => $records) {
+                    foreach ($records["data"] as $record) {
+                        if ($record instanceof Contacts\Data\Data) {
+                            $uuid = rand();
+                            $exist = $contacts->exists($record->email);
+                            $merge = $contacts->merge($record, $exist, $mappings[$source]);
+                            $base64 = base64_encode(json_encode($merge));
+                            ?>
                             <div class="card-body d-flex justify-content-between align-items-center">
                                 <strong class="w-25"><?= $record->identifier() ?></strong>
                                 <span class="w-25"><?= $record->email ?></span>
@@ -168,13 +168,12 @@ if ($editmode) {
                                       data-index="<?= $record->index() ?>">delete</span>
                             </span>
                             </div>
-                        </div>
-                        <?php
+                            <?php
+                        }
                     }
                 }
-            }
-
-            if (!$has_entries) {
+                echo '</div>';
+            } else {
                 echo '<div class="cntnd_alert cntnd_alert-primary">Keine neuen Einträge vorhanden.</div>';
             }
             ?>
@@ -193,12 +192,32 @@ if ($editmode) {
             ?>
         </div>
 
+        <div class="tabs__content--pane fade <?= ($count_sources == 0) ? "active" : "" ?>"
+             id="contacts__content--contacts">
+            <script>
+                const headers = <?= json_encode($contacts->headers()) ?>;
+                const columns_handsontable = <?= json_encode($contacts->columns()) ?>;
+                const data_handsontable = <?= $contacts->data() ?>;
+            </script>
+            <div class="spreadsheet__toolbar">
+                <button class="material-symbols-outlined new_contact">note_add</button>
+                <button class="material-symbols-outlined store_csv">save</button>
+                <button class="material-symbols-outlined export_csv">download</button>
+                <input id="search_field" type="search" placeholder="Suchen"/>
+            </div>
+            <div id="exampleParent">
+                <div id="example"></div>
+            </div>
+        </div>
+
         <div class="tabs__content--pane fade" id="contacts__content--mappings">
             <h2>Mappings</h2>
             <form name="mapping_form" id="mapping_form" method="post">
                 <div class="card card--list">
                     <?php
-                    foreach ($contacts->data_types() as $header => $type) {
+                    $data_types = $contacts->data_types();
+                    foreach ($contacts->headers() as $header) {
+                        $type = $data_types[$header];
                         ?>
                         <div class="card-body d-flex justify-content-between align-items-center">
                             <strong class="w-25"><?= $header ?></strong>
@@ -226,25 +245,9 @@ if ($editmode) {
                     <input type="hidden" name="mapping_form_action" value="update"/>
                     <button class="btn btn-primary" type="submit">Speichern</button>
                     <button class="btn btn-light" type="reset">Zurücksetzen</button>
+                    <button class="btn btn-dark right mapping_form_remove" type="button">Löschen</button>
                 </div>
             </form>
-        </div>
-
-        <div class="tabs__content--pane fade <?= ($count_sources == 0) ? "active" : "" ?>"
-             id="contacts__content--contacts">
-            <script>
-                const headers = <?= json_encode($contacts->headers()) ?>;
-                const columns_handsontable = <?= json_encode($contacts->columns()) ?>;
-                const data_handsontable = <?= $contacts->data() ?>;
-            </script>
-            <div class="spreadsheet__toolbar">
-                <button class="material-symbols-outlined store_csv">save</button>
-                <button class="material-symbols-outlined export_csv">download</button>
-                <input id="search_field" type="search" placeholder="Suchen"/>
-            </div>
-            <div id="exampleParent">
-                <div id="example"></div>
-            </div>
         </div>
 
         <div class="tabs__content--pane fade" id="contacts__content--history">

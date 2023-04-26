@@ -62,7 +62,7 @@ class CntndContactsOutput extends CntndUtil
             'table' => self::TABLE,
             'idart' => \cSecurity::toInteger($this->idart),
             'source' => $source,
-            'type' => 'mappings',
+            'type' => 'mapping',
             'data' => self::escapeData(json_encode($data))
         );
         $this->store_values($values);
@@ -135,7 +135,7 @@ class CntndContactsOutput extends CntndUtil
     public function source_mappings(): array
     {
         $data = [];
-        $sql = "SELECT source, serializeddata FROM :table WHERE idart=:idart AND type = 'mapping'";
+        $sql = "SELECT * FROM :table WHERE idart=:idart AND type = 'mapping'";
         $values = array(
             'table' => self::TABLE,
             'idart' => \cSecurity::toInteger($this->idart)
@@ -146,7 +146,18 @@ class CntndContactsOutput extends CntndUtil
                 $data[$this->db->f('source')] = self::unescapeData($this->db->f('serializeddata'));
             }
         }
+
         return $data;
+    }
+
+    public function delete(): void
+    {
+        $sql = "DELETE FROM :table WHERE idart=:idart";
+        $values = array(
+            'table' => self::TABLE,
+            'idart' => \cSecurity::toInteger($this->idart)
+        );
+        $this->db->query($sql, $values);
     }
 }
 
