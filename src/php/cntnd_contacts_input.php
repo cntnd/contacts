@@ -16,6 +16,7 @@ $cache = (bool)"CMS_VALUE[14]";
 $history = (bool)"CMS_VALUE[15]";
 $index = (int)"CMS_VALUE[16]";
 $mailchimp_folder = "CMS_VALUE[20]";
+$debug = (bool) "CMS_VALUE[100]";
 
 // other vars
 $contacts = new Cntnd\Contacts\CntndContactsInput($client);
@@ -129,6 +130,15 @@ $contacts = new Cntnd\Contacts\CntndContactsInput($client);
                 }
                 ?>
             </select>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Debug Modus</legend>
+        <div class="form-check form-check-inline">
+            <input id="debug" class="form-check-input" name="CMS_VAR[100]"
+                   type="checkbox" <?= ($debug) ? "checked" : "" ?>/>
+            <label for="debug" class="form-check-label">Debug Modus aktivieren</label>
         </div>
     </fieldset>
 </div>

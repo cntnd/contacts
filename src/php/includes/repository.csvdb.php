@@ -96,20 +96,14 @@ class CSVDBRepository extends Repository
             'PLZ' => 'PLZ',
             'Ort' => 'Ort',
             'Telefon' => 'Telefon',
-            'E-Mail-Adresse' => 'E-Mail-Adresse',
+            'E-Mail' => 'E-Mail',
             'Geburtstag' => 'Geburtstag',
-            'Infomail Spontan' => 'Infomail Spontan',
             'Newsletter' => 'Newsletter',
+            'Infomail spontan unterwegs' => 'Infomail spontan unterwegs',
             'Freunde' => 'Freunde',
-            'Kollegen' => 'Kollegen',
-            'Nachbarn' => 'Nachbarn',
-            'BLWL' => 'BLWL',
-            'Bergsportunternehmen' => 'Bergsportunternehmen',
-            'Geschäftskollegen' => 'Geschäftskollegen',
+            'WL/BL' => 'WL/BL',
             'Dienstleister' => 'Dienstleister',
-            'Basket' => 'Basket',
-            'mpa' => 'mpa',
-            'SAC Birehubel' => 'SAC Birehubel'
+            'Diverse' => 'Diverse'
         ];
     }
 
@@ -134,6 +128,6 @@ class CSVDBRepository extends Repository
 
     public function dump(string $records): void
     {
-        $this->csvdb->dump($records);
+        $this->csvdb->dump($records."\n");
     }
 }

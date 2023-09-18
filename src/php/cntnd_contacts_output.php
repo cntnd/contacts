@@ -30,6 +30,7 @@ if ($editmode) {
     $history = (bool)"CMS_VALUE[15]";
     $index = (int)"CMS_VALUE[16]";
     $mailchimp_folder = "CMS_VALUE[20]";
+    $debug = (bool) "CMS_VALUE[100]";
 
     // other vars
     $output = new \Cntnd\Contacts\CntndContactsOutput($idart);
@@ -39,7 +40,7 @@ if ($editmode) {
     if ($source == "csv") {
         //csvdb
         $config = new CSVDB\Helpers\CSVConfig($index, $encoding, $delimiter, $headers, $cache, $history);
-        $repository = new CSVDBRepository($csv, $config);
+        $repository = new CSVDBRepository($csv, $config, $debug);
     } else {
         $repository = new cDBRepository();
     }
@@ -63,6 +64,9 @@ if ($editmode) {
     // module
     echo "<pre>";
     if ($_POST) {
+        if ($debug) {
+            var_dump($_POST);
+        }
         if (array_key_exists('editor_form_action', $_POST)) {
             // Dashbord & Editor
             if ($_POST['editor_form_action'] == Contacts\Contacts::NEW || $_POST['editor_form_action'] == Contacts\Contacts::UPDATE) {
@@ -70,6 +74,9 @@ if ($editmode) {
                 if (!empty($_POST['editor_form_source']) && !empty($_POST['editor_form_index'])) {
                     $contacts->upsert_source($data, $_POST['editor_form_source'], $_POST['editor_form_index'], $idart);
                 } else {
+                    if ($debug) {
+                        var_dump($data);
+                    }
                     $contacts->upsert($data);
                 }
             } elseif ($_POST['editor_form_action'] == Contacts\Contacts::DELETE) {
